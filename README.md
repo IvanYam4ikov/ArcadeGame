@@ -2,7 +2,7 @@
 
 A small retro arcade front end built in C++ with SDL2. It includes a navigable
 main menu, game carousel, audio options, a high-score screen, and a complete
-single-level Breakout game.
+single-level Breakout game and a playable Tetris core.
 
 ![Arcade System main menu](source/rootNodeImages/rootNodeScreenBackground.png)
 
@@ -11,8 +11,9 @@ single-level Breakout game.
 This is a working portfolio MVP restored from an older student project. The
 Breakout includes paddle control, brick collision, scoring, three lives, and an
 endless advancing board: clearing the lowest row moves the remaining bricks
-down and adds a new row at the top. Tetris and Frogger are menu concepts and
-currently return to the main menu rather than launching a game.
+down and adds a new row at the top. Tetris now has a 10x20 board with all seven
+tetrominoes, movement, rotation, gravity, collision, locking, respawning, and
+game-over detection. Frogger remains a menu concept.
 
 The Sound option controls generated menu-click and Breakout collision effects
 as well as the selected background music. Clearing the entire board restores
@@ -51,6 +52,10 @@ directory. Use the mouse to navigate. In Breakout, move with the arrow keys or
 `P` to pause or resume with a three-second countdown, and `Q` or `Escape` to
 return to the carousel.
 
+In Tetris, use Left/Right to move, Down to soft drop, Up or `Z` to rotate,
+`Space` to hard drop, `N` to restart after game over, and `Q` or `Escape` to
+return to the carousel.
+
 To remove generated object files and the executable:
 
 ```sh
@@ -67,7 +72,8 @@ make clean
 ## Next steps
 
 - Add additional Breakout levels, sound effects, and persistent high scores.
-- Implement or remove the Tetris and Frogger placeholders.
+- Add line clearing, scoring, previews, and high-score submission to Tetris.
+- Implement or remove the Frogger placeholder.
 - Replace the bundled SDL distribution with package-manager/CMake discovery for
   portable Linux and Windows builds.
 - Add automated tests around navigation and game physics.

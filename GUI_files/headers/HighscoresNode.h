@@ -40,9 +40,11 @@ public:
 
             std::vector<ArcadeTexture*> lines;
             for (int rank = 0; rank < 10; ++rank) {
+                const std::string rankLabel = rank + 1 < 10
+                    ? " " + std::to_string(rank + 1) : std::to_string(rank + 1);
                 ArcadeTexture* line = createSimpleText(renderer,
                     "fonts/pixel/classic.ttf", 18,
-                    std::to_string(rank + 1) + ".  ---", 255, 255, 255);
+                    rankLabel + ".  ---", 255, 255, 255);
                 line->setPosition(220, 95 + rank * 27);
                 scoreScreen->addTextureToScreen(line);
                 lines.push_back(line);
@@ -90,11 +92,13 @@ public:
         for (std::size_t game = 0; game < gameIds_.size(); ++game) {
             const std::vector<int> scores = ScoreStore::load(gameIds_[game]);
             for (std::size_t rank = 0; rank < scoreLines_[game].size(); ++rank) {
+                const std::string rankLabel = rank + 1 < 10
+                    ? " " + std::to_string(rank + 1) : std::to_string(rank + 1);
                 const std::string score = rank < scores.size()
                     ? std::to_string(scores[rank]) : "---";
                 scoreLines_[game][rank]->loadFromRenderedText(
                     "fonts/pixel/classic.ttf", 18,
-                    std::to_string(rank + 1) + ".  " + score,
+                    rankLabel + ".  " + score,
                     {255, 255, 255, 255});
                 scoreLines_[game][rank]->setSize(WIDTH_ORIGINAL, HEIGHT_ORIGINAL);
             }
