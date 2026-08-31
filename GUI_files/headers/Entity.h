@@ -12,7 +12,7 @@
 class Entity
 {
 public:
-	~Entity()
+	virtual ~Entity()
 	{
 		delete gameObjectTexture;
 	}
@@ -20,13 +20,13 @@ public:
 	ArcadeTexture* getGameObjectTexture() { return gameObjectTexture; }
 
 	// ACCESSORS
-	int getXVelocity() { return xVelocity; }
-	int getYVelocity() { return yVelocity; }
-	int getXPos() { return xPos; }
-	int getYPos() { return yPos; }
-	int getWidth() { return width; }
-	int getHeight() { return height; }
-	bool getState() { return state; }
+	int getXVelocity() const { return xVelocity; }
+	int getYVelocity() const { return yVelocity; }
+	int getXPos() const { return xPos; }
+	int getYPos() const { return yPos; }
+	int getWidth() const { return width; }
+	int getHeight() const { return height; }
+	bool getState() const { return state; }
 
 	// MUTATORS
 	void setState(bool state_in) { state = state_in; }

@@ -9,7 +9,7 @@ class Tile : public Entity
 {
     public:
     Tile(){}
-    void update(SDL_Event* e){}
+    void update(SDL_Event*) {}
 };
 
 #endif

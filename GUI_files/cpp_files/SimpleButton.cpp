@@ -1,6 +1,7 @@
 // SimpleButton.cpp
 
 #include "SimpleButton.h"
+#include "SoundEffects.h"
 
 SimpleButton::SimpleButton()
 {
@@ -72,6 +73,7 @@ Action SimpleButton::update(SDL_Event* event)
 
 	if (event && event->type == SDL_MOUSEBUTTONDOWN && inside)
 	{
+		SoundEffects::playClick();
 		newAction = *getButtonAction();
 	}
 	return newAction;

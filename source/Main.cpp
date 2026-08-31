@@ -1,172 +1,127 @@
-// main.cpp
-
 #include "SDL.h"
+#include "SDL_image.h"
 #include "SDL_mixer.h"
-#include "RootNode.h"
+#include "SDL_ttf.h"
+
 #include "Config.h"
+#include "RootNode.h"
+#include "SoundEffects.h"
 
-// Pointers to objects needed to initialize our program
-SDL_Window* arcadeSystemWindow = nullptr;
-SDL_Renderer* arcadeSystemRenderer = nullptr;
-TTF_Font* font = nullptr;
-Node* currentNode = nullptr;
+#include <cstdio>
 
-// initialization function, initializes above objects and calls some SDL initialization functions
-bool init()
+namespace {
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+
+bool initialize()
 {
-	// Initialization flag
-	bool success = true;
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        std::fprintf(stderr, "SDL could not initialize: %s\n", SDL_GetError());
+        return false;
+    }
+    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
+        std::fprintf(stderr, "SDL_image could not initialize: %s\n", IMG_GetError());
+        return false;
+    }
+    if (TTF_Init() == -1) {
+        std::fprintf(stderr, "SDL_ttf could not initialize: %s\n", TTF_GetError());
+        return false;
+    }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::fprintf(stderr, "SDL_mixer could not initialize: %s\n", Mix_GetError());
+        return false;
+    }
+    SoundEffects::initialize();
 
-	// Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-	{
-		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-		success = false;
-	}
-	else
-	{
-		// Create window in the center of the screen
-		arcadeSystemWindow = SDL_CreateWindow("Arcade System", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
-		if (arcadeSystemWindow == NULL)	
-		{
-			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		else
-		{
-			// initialize renderer, set the background as white for the wwindow, sync the renderer with the monitor refresh rate
-			arcadeSystemRenderer = SDL_CreateRenderer(arcadeSystemWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-			SDL_SetRenderDrawColor(arcadeSystemRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		}
-		// Initialize SDL_mixer
-		if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-		{
-			printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-			success = false;
-		}
-		// initialize true type font 
-		if (TTF_Init() == -1)
-		{
-			printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
-			success = false;
-		}
-
-	}
-	return success;
+    window = SDL_CreateWindow("Arcade System", SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
+    if (!window) {
+        std::fprintf(stderr, "Window could not be created: %s\n", SDL_GetError());
+        return false;
+    }
+    renderer = SDL_CreateRenderer(window, -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {
+        std::fprintf(stderr, "Renderer could not be created: %s\n", SDL_GetError());
+        return false;
+    }
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    return true;
 }
 
-// Starting point of program execution
-int main(int argc, char* argv[])
-{	
-	// first call initialization
-	if (!init())
-	{
-		printf("Failed to initialize!\n");
-	}
-	// If initializes successfully then continue
-	else
-	{
-		// First create the root node which triggers creation of all nodes through constructor
- 		RootNode rootNode(arcadeSystemRenderer, nullptr); 
-		currentNode = &rootNode;
-		
-		// Pointer to a music object, holds the music currently being played in the progrm
-		Mix_Music* currentMusic = nullptr;
-		
-		// Is the sound on or off
-		bool soundState = false; 
+void shutdown()
+{
+    Mix_HaltMusic();
+    SoundEffects::shutdown();
+    Mix_CloseAudio();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    renderer = nullptr;
+    window = nullptr;
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+}
+} // namespace
 
-		// Flag for main loop, is our program running? 
-		bool quit = false;
+int main(int, char**)
+{
+    if (!initialize()) {
+        shutdown();
+        return 1;
+    }
 
-		// GUI loop
-		while (!quit)
-		{	
-			// Handle user events until none detected
-			SDL_Event e;
-			while (SDL_PollEvent(&e) != 0)
-			{
-				// User requests quit by clicking window X
-				if (e.type == SDL_QUIT)
-				{
-					quit = true;
-				}
-				
-				// Start update process by handling the next event on the event queue
-				// Returns an action to execute in this top tier of the menu system
-				Action newAction = currentNode->update(&e);
-				
-				// Check to see what the action returned by the node's update is
-				switch (newAction.actionName)
-				{
-				case(MOVE_NODES):
-				{
-					// When moving nodes, first exit, set the current, then enter
-					printf("\nMOVING NODES\n");
-					currentNode->exitNode();
-					currentNode = (Node*)(newAction.actionParameter);
-					currentNode->enter();
-					break;
-				}
-				case(CHANGE_SOUND):
-				{
-					// When changing sound to off, stop the music
-					printf("\n changing sound\n\n");
-					if (newAction.actionParameter == 0)
-					{
-						printf("\n sound turning off\n\n");
-						Mix_HaltMusic();
-						soundState = false;
-					}
-					else
-					{
-						soundState = true;
-						printf("\n sound turning on\n\n");
-						Mix_PlayMusic(currentMusic, -1);
-					}
-					break;
-				}
-				case(CHANGE_MUSIC):
-				{
-					// When changing music, check whether sound is on or not
-					printf("\n changing music\n\n");
-					printf("\n music pointer: %p\n\n", (Mix_Music*)(newAction.actionParameter));
-					currentMusic = (Mix_Music*)(newAction.actionParameter);
-					if (soundState == true)
-					{
-						if (currentMusic == nullptr)
-						{
-							Mix_HaltMusic();
-						}
-						else
-						{
-							Mix_PlayMusic(currentMusic, -1);
-						}
-					}
-					break;
-				}
-				default:
-					break;
-				}
-			}
-			// After handling all events, update all graphics for animation
-			currentNode->update(nullptr);
+    {
+        RootNode rootNode(renderer, nullptr);
+        Node* currentNode = &rootNode;
+        Mix_Music* currentMusic = nullptr;
+        bool soundEnabled = false;
+        bool quit = false;
 
-			// After updating, render
-			currentNode->render(arcadeSystemRenderer);
-			SDL_RenderPresent(arcadeSystemRenderer);
-		}
-	}
-	// After quitting, free up SDL_Resources -- Note: rootNode was created on the stack so after quitting it will go
-	// Out of scope and its destructor will be called which triggers the destructors of all other nodes
-	Mix_CloseAudio();
-	TTF_CloseFont(font);
-	SDL_DestroyRenderer(arcadeSystemRenderer);
-	SDL_DestroyWindow(arcadeSystemWindow);
+        while (!quit) {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) {
+                    quit = true;
+                    continue;
+                }
 
-	Mix_Quit();
-	IMG_Quit();
-	TTF_Quit();
-	SDL_Quit();
-	return 0;
+                const Action action = currentNode->update(&event);
+                switch (action.actionName) {
+                case MOVE_NODES:
+                    if (action.actionParameter) {
+                        currentNode->exitNode();
+                        currentNode = static_cast<Node*>(action.actionParameter);
+                        currentNode->enter();
+                    }
+                    break;
+                case CHANGE_SOUND:
+                    soundEnabled = action.actionParameter != nullptr;
+                    SoundEffects::setEnabled(soundEnabled);
+                    if (soundEnabled) SoundEffects::playClick();
+                    if (soundEnabled && currentMusic) Mix_PlayMusic(currentMusic, -1);
+                    else Mix_HaltMusic();
+                    break;
+                case CHANGE_MUSIC:
+                    currentMusic = static_cast<Mix_Music*>(action.actionParameter);
+                    if (soundEnabled && currentMusic) Mix_PlayMusic(currentMusic, -1);
+                    else Mix_HaltMusic();
+                    break;
+                case QUIT_GAME:
+                    quit = true;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            currentNode->update(nullptr);
+            SDL_RenderClear(renderer);
+            currentNode->render(renderer);
+            SDL_RenderPresent(renderer);
+        }
+    }
+
+    shutdown();
+    return 0;
 }

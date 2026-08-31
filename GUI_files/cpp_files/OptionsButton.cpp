@@ -1,6 +1,7 @@
 // OptionsButton.cpp
 
 #include "OptionsButton.h"
+#include "SoundEffects.h"
 
 // override constructor
 OptionsButton::OptionsButton(std::string texturePath_in)
@@ -66,6 +67,7 @@ Action OptionsButton::update(SDL_Event* event)
 
 	if (event && event->type == SDL_MOUSEBUTTONDOWN && inside)
 	{
+		SoundEffects::playClick();
 		if (currentIndex + 1 < buttonActionList.size())
 		{
 			currentIndex += 1;

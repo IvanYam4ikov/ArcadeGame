@@ -2,8 +2,7 @@
 CXX = clang++
 
 #COMPILER_FLAGS specifies the additional compilation options we're using
-# -w suppresses all warnings
-COMPILER_FLAGS = -w -g
+COMPILER_FLAGS = -g -Wall -Wextra -Wpedantic
 
 #INCLUDE_PATHS specifies the additional include paths we'll need
 INCLUDE_PATHS = -I. -I../../SDL_files/include -I../headers -I../../source
@@ -29,7 +28,7 @@ DEPS := $(OBJS:.o=.d)
 # should each be compiled separately and rely only on the according .o file
 # -MMD is a compiler flag that generates rules for make for dependent include files
 $(OBJS): %.o: %.cpp
-	$(CXX) -MMD -c -std=c++11 $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $< -o $@
+	$(CXX) -MMD -c -std=c++11 $(INCLUDE_PATHS) $(COMPILER_FLAGS) $< -o $@
 
 clean:
-	rm *.o $(OBJ_NAME)
+	rm -f $(OBJS) $(DEPS)

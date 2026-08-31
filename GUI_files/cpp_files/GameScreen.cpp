@@ -40,11 +40,12 @@ Action GameScreen::update(SDL_Event* event)
 	{
 		return newAction;
 	}
-	else if ((*event).key.keysym.sym == SDLK_q)
+	else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_q)
 	{
 		newAction = { MOVE_NODES, parentNode };
 		return newAction;
 	}
+	return newAction;
 }
 
 // method to render the current Screen
@@ -91,11 +92,11 @@ void GameScreen::submitScore(SDL_Renderer* ren)
 			{
 				quit = true;
 			}
-			if (&e && (e).key.keysym.sym == SDLK_RETURN)
+			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN)
 			{
 				quit = true;
 			}
-			else if (&e && e.type == SDL_KEYDOWN)
+			else if (e.type == SDL_KEYDOWN)
 			{
 				//Handle backspace
 				if (e.key.keysym.sym == SDLK_BACKSPACE && inputText.length() > 0)
@@ -105,7 +106,7 @@ void GameScreen::submitScore(SDL_Renderer* ren)
 					renderText = true;
 				}
 			}
-			else if (&e && e.type == SDL_TEXTINPUT)
+			else if (e.type == SDL_TEXTINPUT)
 			{
 					//Append character
 				if (inputText.length() < 3)
@@ -177,7 +178,6 @@ void GameScreen::submitScore(SDL_Renderer* ren)
 	// now write the list back to the file (will overwrite)
 	ofstream fileOut;
 	fileOut.open(fileName);
-	std::list<playerScore>::const_iterator iterator = playerScores.begin();
 	fileOut << gameName;
 	int i = 1;
 	std::string fileString = "";

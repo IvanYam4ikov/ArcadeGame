@@ -4,10 +4,13 @@
 #include "MenuScreen.h"
 #include "SimpleButton.h"
 #include "Config.h"
+#include "GameNode.h"
 
 class GameMenuNode : public Node {		// GameMenuNode inherits from Node
 public:
 	GameMenuNode(SDL_Renderer* renderer_in = nullptr, Node* parentNode_in = nullptr) : Node(renderer_in, parentNode_in) {
+		GameNode* breakoutGame = new GameNode(renderer_in, this);
+		children.push_back(breakoutGame);
 		
 		// Declare and initialize screens for three games
     	MenuScreen* tetrisScreen = createMenuScreen();
@@ -70,7 +73,7 @@ public:
 		// Add the button that takes us to the brickbreaker game		
 		SimpleButton* brickBreakerButton = createSimpleButton(renderer_in, "gameMenuNodeImages/brickBreakerGameButton.png");
 		brickBreakerButton->setButtonPosition(windowWidth / 2 - brickBreakerButton->getWidth() / 2, windowHeight / 2 - brickBreakerButton->getHeight() / 2);
-		brickBreakerButton->setButtonAction(createAction(MOVE_NODES, parentNode_in));
+		brickBreakerButton->setButtonAction(createAction(MOVE_NODES, breakoutGame));
 		brickBreakerScreen->addButtonToScreen(brickBreakerButton);
 
 		// Add the button that takes us to the frogger screen

@@ -67,6 +67,10 @@ public:
 
 	// this method is used to create text textures that can be rendered
 	bool loadFromRenderedText(std::string filePath, int size, std::string textureText, SDL_Color textColor);
+	bool loadFromRenderedTextWrapped(std::string filePath, int size,
+		std::string textureText, SDL_Color textColor, int wrapWidth);
+	bool loadFromRenderedTextCenteredWrapped(std::string filePath, int size,
+		std::string textureText, SDL_Color textColor, int wrapWidth);
 
 	// this method is used to edit a texture to make it look selected
 	void setSelected(bool selected_in);

@@ -30,3 +30,20 @@
 *.exe
 *.out
 *.app
+
+# macOS metadata
+.DS_Store
+
+# Project executables and CMake output
+arcadeSystem
+build/
+.cache/
+
+# Local player data
+highscores_*.txt
+source/highscores_*.txt
+breakout_highscores.txt
+source/breakout_highscores.txt
+
+# Embedded Homebrew checkout
+SDL_files/homebrew/

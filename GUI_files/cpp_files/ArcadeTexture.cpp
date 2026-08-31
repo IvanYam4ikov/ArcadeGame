@@ -1,6 +1,9 @@
 // ArcadeTexture.cpp
 
 #include "ArcadeTexture.h"
+#include <algorithm>
+#include <sstream>
+#include <vector>
 
 // Default Constructor
 ArcadeTexture::ArcadeTexture()
@@ -243,4 +246,83 @@ void ArcadeTexture::render(SDL_Renderer* renderer)
 		dest = nullptr;
 	}
 	SDL_RenderCopy(renderer, texture, source, dest);
+}
+
+bool ArcadeTexture::loadFromRenderedTextWrapped(std::string filePath, int size,
+	std::string textureText, SDL_Color textColor, int wrapWidth)
+{
+	SDL_DestroyTexture(texture);
+	texture = nullptr;
+	TTF_CloseFont(fontRen);
+	fontRen = TTF_OpenFont(filePath.c_str(), size);
+	if (fontRen == nullptr) return false;
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(fontRen,
+		textureText.c_str(), textColor, static_cast<Uint32>(wrapWidth));
+	if (textSurface == nullptr) return false;
+	texture = SDL_CreateTextureFromSurface(texRen, textSurface);
+	if (texture != nullptr) {
+		fileWidth = textSurface->w;
+		fileHeight = textSurface->h;
+	}
+	SDL_FreeSurface(textSurface);
+	return texture != nullptr;
+}
+
+bool ArcadeTexture::loadFromRenderedTextCenteredWrapped(std::string filePath, int size,
+	std::string textureText, SDL_Color textColor, int wrapWidth)
+{
+	SDL_DestroyTexture(texture);
+	texture = nullptr;
+	TTF_CloseFont(fontRen);
+	fontRen = TTF_OpenFont(filePath.c_str(), size);
+	if (fontRen == nullptr) return false;
+
+	std::vector<std::string> lines;
+	std::istringstream paragraphs(textureText);
+	std::string paragraph;
+	while (std::getline(paragraphs, paragraph)) {
+		std::istringstream words(paragraph);
+		std::string word;
+		std::string line;
+		while (words >> word) {
+			const std::string candidate = line.empty() ? word : line + " " + word;
+			int candidateWidth = 0;
+			TTF_SizeText(fontRen, candidate.c_str(), &candidateWidth, nullptr);
+			if (!line.empty() && candidateWidth > wrapWidth) {
+				lines.push_back(line);
+				line = word;
+			} else line = candidate;
+		}
+		lines.push_back(line.empty() ? " " : line);
+	}
+	if (lines.empty()) lines.push_back(" ");
+
+	std::vector<SDL_Surface*> surfaces;
+	int surfaceWidth = 1;
+	const int lineHeight = TTF_FontLineSkip(fontRen);
+	for (std::vector<std::string>::const_iterator line = lines.begin(); line != lines.end(); ++line) {
+		SDL_Surface* rendered = TTF_RenderText_Solid(fontRen, line->c_str(), textColor);
+		if (!rendered) continue;
+		surfaceWidth = std::max(surfaceWidth, rendered->w);
+		surfaces.push_back(rendered);
+	}
+	if (surfaces.empty()) return false;
+
+	SDL_Surface* combined = SDL_CreateRGBSurfaceWithFormat(0, surfaceWidth,
+		lineHeight * static_cast<int>(surfaces.size()), 32, SDL_PIXELFORMAT_RGBA32);
+	if (!combined) return false;
+	SDL_FillRect(combined, nullptr, SDL_MapRGBA(combined->format, 0, 0, 0, 0));
+	SDL_SetSurfaceBlendMode(combined, SDL_BLENDMODE_BLEND);
+	for (std::size_t index = 0; index < surfaces.size(); ++index) {
+		SDL_Rect destination = {(surfaceWidth - surfaces[index]->w) / 2,
+			static_cast<int>(index) * lineHeight, surfaces[index]->w, surfaces[index]->h};
+		SDL_BlitSurface(surfaces[index], nullptr, combined, &destination);
+		SDL_FreeSurface(surfaces[index]);
+	}
+	texture = SDL_CreateTextureFromSurface(texRen, combined);
+	fileWidth = combined->w;
+	fileHeight = combined->h;
+	SDL_FreeSurface(combined);
+	return texture != nullptr;
 }

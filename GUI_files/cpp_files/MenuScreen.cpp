@@ -27,7 +27,7 @@ MenuScreen::~MenuScreen()
 
 Action MenuScreen::update(SDL_Event* event)
 {
-	Action newAction;
+	Action newAction = { DO_NOTHING, nullptr };
 	for (int i = 0; i < buttonList.size(); i++)
 	{
 		newAction = buttonList[i]->update(event);
