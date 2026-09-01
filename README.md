@@ -13,7 +13,11 @@ Breakout includes paddle control, brick collision, scoring, three lives, and an
 endless advancing board: clearing the lowest row moves the remaining bricks
 down and adds a new row at the top. Tetris now has a 10x20 board with all seven
 tetrominoes, movement, rotation, gravity, collision, locking, respawning, and
-game-over detection. Frogger remains a menu concept.
+game-over detection. Completed rows are removed, scoring follows the standard
+single/double/triple/Tetris values, and the game accelerates every ten lines.
+A seven-piece bag keeps piece selection fair, the next piece is previewed, and
+an outlined ghost piece shows where the active piece will land. Tetris scores
+are saved to its own leaderboard. Frogger remains a menu concept.
 
 The Sound option controls generated menu-click and Breakout collision effects
 as well as the selected background music. Clearing the entire board restores
@@ -72,7 +76,7 @@ make clean
 ## Next steps
 
 - Add additional Breakout levels, sound effects, and persistent high scores.
-- Add line clearing, scoring, previews, and high-score submission to Tetris.
+- Add a ghost piece, hold-piece support, and pause handling to Tetris.
 - Implement or remove the Frogger placeholder.
 - Replace the bundled SDL distribution with package-manager/CMake discovery for
   portable Linux and Windows builds.

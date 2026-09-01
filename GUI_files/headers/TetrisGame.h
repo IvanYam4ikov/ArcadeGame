@@ -3,8 +3,8 @@
 
 #include "GameScreen.h"
 
-#include <array>
 #include <random>
+#include <vector>
 
 class TetrisGame : public GameScreen {
 public:
@@ -13,6 +13,7 @@ public:
     void render(SDL_Renderer* renderer);
     void newGame();
     void setStatus(ArcadeTexture* value) { status = value; }
+    void setLinesHud(ArcadeTexture* value) { linesHud = value; }
 
 private:
     static const int boardWidth = 10;
@@ -21,12 +22,16 @@ private:
     struct Piece { int type; int rotation; int x; int y; };
 
     Block transformedBlock(int blockIndex, int rotation) const;
+    Block transformedBlockForType(int type, int blockIndex, int rotation) const;
     bool canPlace(const Piece& candidate) const;
     bool tryMove(int dx, int dy);
     void rotatePiece(int direction);
     void lockPiece();
+    int clearCompletedLines();
     void spawnPiece();
+    int takeNextPiece();
     void updateStatus(const char* text);
+    void updateLinesHud();
     SDL_Color colorFor(int value) const;
 
     int board[boardHeight][boardWidth];
@@ -35,6 +40,12 @@ private:
     Uint32 lastDropTime;
     Uint32 dropInterval;
     ArcadeTexture* status;
+    ArcadeTexture* linesHud;
+    int linesCleared;
+    int score;
+    int level;
+    int nextPieceType;
+    std::vector<int> pieceBag;
     std::mt19937 randomGenerator;
 };
 

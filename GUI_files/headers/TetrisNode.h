@@ -17,6 +17,17 @@ public:
         title->setPosition(18, 45);
         game->addTextureToScreen(title);
 
+        ArcadeTexture* linesHud = createSimpleText(renderer,
+            "fonts/pixel/classic.ttf", 20, "LINES 0", 255, 255, 255);
+        linesHud->setPosition(22, 145);
+        game->addTextureToScreen(linesHud);
+        game->setLinesHud(linesHud);
+
+        ArcadeTexture* nextLabel = createSimpleText(renderer,
+            "fonts/pixel/classic.ttf", 18, "NEXT", 255, 255, 255);
+        nextLabel->setPosition(500, 105);
+        game->addTextureToScreen(nextLabel);
+
         ArcadeTexture* status = createSimpleText(renderer, "fonts/pixel/classic.ttf",
             15, "ARROWS MOVE", 255, 255, 0);
         game->addTextureToScreen(status);
