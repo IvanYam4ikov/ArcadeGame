@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 #include <string>
 
 namespace {
@@ -13,11 +12,13 @@ const SDL_Color hudColor = {255, 255, 255, 255};
 const SDL_Color messageColor = {255, 255, 0, 255};
 const int brickColumns = 10;
 const int brickStartX = 45;
-const int brickStartY = 235;
+const int brickStartY = 175;
 const int brickStepX = 55;
 const int brickStepY = 25;
 const int speedThreshold = 1000;
-const int messageY = 180;
+// Reserve the strip between the HUD and the logo for status messages. At this
+// height, even two-line messages finish above the BRICK BREAKER title.
+const int messageY = 62;
 const int normalPaddleWidth = 78;
 const int widePaddleWidth = 130;
 const Uint32 effectDuration = 10000;
@@ -25,9 +26,10 @@ const Uint32 effectDuration = 10000;
 
 SimpleGame::SimpleGame()
     : ball(nullptr), paddle(nullptr), hud(nullptr), message(nullptr), score(0),
-      lives(3), bricksDestroyed(0), nextPowerUp(0), roundActive(false),
+      lives(3), bricksDestroyed(0), roundActive(false),
       wideUntil(0), slowUntil(0), pierceUntil(0), pauseTexture(nullptr),
-      paused(false), pauseStarted(0), resumeAt(0), countdownValue(0)
+      paused(false), pauseStarted(0), resumeAt(0), countdownValue(0),
+      randomGenerator(std::random_device()())
 {
     for (int index = 0; index < 5; ++index) powerUpTextures[index] = nullptr;
 }
@@ -162,7 +164,6 @@ void SimpleGame::newGame()
     score = 0;
     lives = 3;
     bricksDestroyed = 0;
-    nextPowerUp = 0;
     paused = false;
     pauseStarted = resumeAt = 0;
     countdownValue = 0;
@@ -330,9 +331,10 @@ void SimpleGame::processBall(Ball* currentBall)
 
 void SimpleGame::spawnPowerUp(int x, int y)
 {
-    PowerUp power = {static_cast<PowerUpType>(nextPowerUp), {x, y, 24, 24}, true};
+    std::uniform_int_distribution<int> powerType(0, 4);
+    PowerUp power = {static_cast<PowerUpType>(powerType(randomGenerator)),
+        {x, y, 24, 24}, true};
     powerUps.push_back(power);
-    nextPowerUp = (nextPowerUp + 1) % 5;
 }
 
 void SimpleGame::updatePowerUps()
@@ -359,14 +361,42 @@ void SimpleGame::activatePowerUp(PowerUpType type)
     switch (type) {
     case WIDE_PADDLE:
         setPaddleWidth(widePaddleWidth); wideUntil = now + effectDuration; label = "WIDE PADDLE"; break;
-    case MULTIBALL:
-        for (std::size_t index = 0; index < extraBalls.size(); ++index) {
-            Ball* extra = extraBalls[index];
-            extra->setXPos(ball->getXPos()); extra->setYPos(ball->getYPos());
-            extra->setXVelocity(index == 0 ? -std::abs(ball->getXVelocity()) : std::abs(ball->getXVelocity()));
-            extra->setYVelocity(ball->getYVelocity()); extra->setState(true);
+    case MULTIBALL: {
+        Ball* source = ball;
+        if (!source->getState()) {
+            for (std::vector<Ball*>::iterator extra = extraBalls.begin();
+                 extra != extraBalls.end(); ++extra) {
+                if ((*extra)->getState()) {
+                    source = *extra;
+                    break;
+                }
+            }
         }
-        label = "MULTIBALL"; break;
+        const int spawnX = std::max(0, std::min(
+            windowWidth - source->getWidth(), source->getXPos()));
+        const int spawnY = std::max(0, std::min(
+            paddle->getYPos() - source->getHeight() - 4, source->getYPos()));
+        const int horizontalSpeed = std::max(2, std::abs(source->getXVelocity()));
+        const int sourceDirection = source->getXVelocity() < 0 ? -1 : 1;
+
+        std::vector<Ball*> allBalls;
+        allBalls.push_back(ball);
+        allBalls.insert(allBalls.end(), extraBalls.begin(), extraBalls.end());
+        for (std::size_t index = 0; index < allBalls.size(); ++index) {
+            Ball* current = allBalls[index];
+            const int offset = (static_cast<int>(index) - 1) * current->getWidth();
+            current->setXPos(std::max(0, std::min(
+                windowWidth - current->getWidth(), spawnX + offset)));
+            current->setYPos(spawnY);
+            current->setXVelocity(index == 0 ? -horizontalSpeed
+                : (index == 1 ? sourceDirection * horizontalSpeed
+                    : horizontalSpeed));
+            current->setYVelocity(-verticalSpeed());
+            current->setState(true);
+        }
+        label = "MULTIBALL";
+        break;
+    }
     case EXTRA_LIFE: ++lives; label = "EXTRA LIFE"; break;
     case SLOW_BALL:
         slowUntil = now + effectDuration;

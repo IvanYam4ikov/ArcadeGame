@@ -6,6 +6,7 @@
 #include "GameScreen.h"
 #include "Tile.h"
 
+#include <random>
 #include <string>
 #include <vector>
 
@@ -59,7 +60,6 @@ private:
     int score;
     int lives;
     int bricksDestroyed;
-    int nextPowerUp;
     bool roundActive;
     Uint32 wideUntil;
     Uint32 slowUntil;
@@ -70,6 +70,7 @@ private:
     Uint32 pauseStarted;
     Uint32 resumeAt;
     int countdownValue;
+    std::mt19937 randomGenerator;
 };
 
 #endif

@@ -50,7 +50,7 @@ public:
                 Tile* brick = new Tile;
                 brick->setGameObjectTexture(createImage(renderer_in, brickTextures[row]));
                 brick->setXPos(45 + column * 55);
-                brick->setYPos(235 + row * 25);
+                brick->setYPos(175 + row * 25);
                 brick->setState(true);
                 game->addEntity(brick);
                 game->addBrick(brick);
