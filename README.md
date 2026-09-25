@@ -1,71 +1,115 @@
 # Arcade System
 
-A small retro arcade front end built in C++ with SDL2. It includes a navigable
-main menu, game carousel, audio options, a high-score screen, and a complete
-single-level Breakout game and a playable Tetris core.
+A retro desktop arcade platform built in C++ with SDL2. The application brings
+Brick Breaker, Tetris, and Frogger together behind a shared menu system with
+audio settings, instructions, persistent high scores, and a consistent
+pixel-art presentation.
 
 ![Arcade System main menu](source/rootNodeImages/rootNodeScreenBackground.png)
 
-## Status
+## Features
 
-This is a working portfolio MVP restored from an older student project. The
-Breakout includes paddle control, brick collision, scoring, three lives, and an
-endless advancing board: clearing the lowest row moves the remaining bricks
-down and adds a new row at the top. Tetris now has a 10x20 board with all seven
-tetrominoes, movement, rotation, gravity, collision, locking, respawning, and
-game-over detection. Completed rows are removed, scoring follows the standard
-single/double/triple/Tetris values, and the game accelerates every ten lines.
-A seven-piece bag keeps piece selection fair, the next piece is previewed, and
-an outlined ghost piece shows where the active piece will land. Tetris scores
-are saved to its own leaderboard. Frogger includes traffic and river lanes,
-moving logs, five home bays, lives, timed crossings, scoring, progressively
-faster rounds, pixel-art sprites, and its own saved high scores. A shared
-Controls screen documents input for all three games.
+- Three complete, independently scored games
+- Mouse-driven menus and keyboard-controlled gameplay
+- Shared Controls screen with instructions for every game
+- Configurable sound effects and background music
+- Separate persistent top-ten leaderboard for each game
+- Reusable object-oriented screen, node, entity, texture, and game-state
+  components
+- Pixel-art graphics and retro fonts throughout the interface
 
-The Sound option controls generated menu-click and Breakout collision effects
-as well as the selected background music. Clearing the entire board restores
-all four rows and returns the ball to the paddle for the next serve.
+## Games
 
-The ball advances through five speed tiers, increasing every 1,000 points.
-Breakout begins with the ball parked on the paddle; press `Space` to serve.
-When all lives are lost, the score is written to
-`source/highscores_brick_breaker.txt`. The Highscores menu lets you choose
-Brick Breaker, Tetris, or Frogger, each backed by its own top-ten score file.
-These local player-data files are intentionally ignored by Git.
+### Brick Breaker
 
-Every fifth destroyed brick drops a randomized power-up: a wider paddle,
-multiball, an extra life, temporary slow motion, or a temporary
-piercing ball that passes through bricks. Pink, cyan, green, blue, and orange
-pixel-art drops represent those effects respectively. Timed effects last ten
-seconds.
+Brick Breaker features paddle-based ball physics, collision-aware bounce angles,
+scoring, three lives, and five speed tiers. The ball begins parked on the paddle
+and returns there before each serve, preventing an immediate lost life when a
+round begins.
 
-Paddle impact position controls the ball's outgoing angle, while minimum
-horizontal and vertical speeds prevent repetitive flat or near-vertical loops.
-Long status messages wrap onto multiple screen rows.
+The brick field continues indefinitely. Clearing its lowest occupied row moves
+the remaining bricks downward and adds a new row at the top. Clearing the entire
+field restores all four starting rows and parks the ball for the next serve.
+
+Every fifth destroyed brick drops one of five randomized pixel-art power-ups:
+
+- Wider paddle
+- Multiball
+- Extra life
+- Temporary slow motion
+- Temporary piercing ball
+
+Timed effects last ten seconds. Multiball spawning is constrained to the arena,
+and the paddle speed scales with the ball so later speed tiers remain playable.
+The game also includes pause handling and a three-second resume countdown.
+
+### Tetris
+
+Tetris uses a 10x20 board and includes all seven tetrominoes, gravity, collision
+detection, piece locking, line clearing, wall kicks, soft drops, hard drops, and
+game-over detection.
+
+Piece generation uses a shuffled seven-piece bag. The interface displays the
+next tetromino as a centered pixel-art shape, while an outlined ghost piece
+previews the active piece's landing position. Scoring follows the standard
+single, double, triple, and Tetris values; the level and falling speed increase
+after every ten cleared lines.
+
+### Frogger
+
+Frogger includes four traffic lanes, four river lanes, moving vehicles and logs,
+five home bays, three lives, and a timer for each crossing. The frog moves with
+the supporting log while in the river and loses a life after hitting traffic,
+landing in the water, leaving the arena, or running out of time.
+
+Players earn points for forward progress, reaching a home bay, and finishing
+with time remaining. Filling all five homes awards a completion bonus and starts
+a faster round. Frogs, cars, trucks, logs, and completed homes use dedicated
+pixel-art sprites.
+
+## Controls
+
+The same information is available from the application's **Controls** menu.
+
+| Game | Controls |
+| --- | --- |
+| Brick Breaker | `Left`/`Right` or `A`/`D` to move, `Space` to serve, `P` to pause |
+| Tetris | `Left`/`Right` to move, `Down` to soft drop, `Up` or `Z` to rotate, `Space` to hard drop |
+| Frogger | Arrow keys or `W`/`A`/`S`/`D` to hop |
+| All games | `N` to restart, `Q` or `Escape` to return to the carousel |
+
+## Architecture
+
+The project applies object-oriented design to separate navigation, presentation,
+and gameplay responsibilities:
+
+- `Node` objects organize the main menu, game carousel, settings, controls,
+  leaderboards, and individual games.
+- `Screen` classes coordinate input, updates, rendering, and transitions.
+- Reusable `Entity` and `ArcadeTexture` abstractions represent interactive
+  objects and SDL textures.
+- Each game owns its rules and state while sharing navigation, audio, and score
+  persistence services.
+- `ScoreStore` maintains an independent local top-ten score file for each game.
+
+Sound effects are synthesized at runtime and respect the global Sound option.
+The Options menu also provides calm, intense, and disabled background-music
+choices.
 
 ## Build on macOS
 
 The repository currently includes the SDL2 headers and libraries used by the
-original macOS build. Xcode command-line tools are required.
+original macOS build. Xcode Command Line Tools are required.
 
 ```sh
+git clone <repository-url>
+cd ArcadeSystem_mac
 make
 make run
 ```
 
-Run the executable from `source/` because asset paths are resolved from that
-directory. Use the mouse to navigate. In Breakout, move with the arrow keys or
-`A`/`D`, press `Space` to serve after losing a ball, `N` to start a new game,
-`P` to pause or resume with a three-second countdown, and `Q` or `Escape` to
-return to the carousel.
-
-In Tetris, use Left/Right to move, Down to soft drop, Up or `Z` to rotate,
-`Space` to hard drop, `N` to restart after game over, and `Q` or `Escape` to
-return to the carousel.
-
-In Frogger, use the arrow keys or `W`/`A`/`S`/`D` to hop, reach each of the five
-home bays before time expires, press `N` to restart after game over, and press
-`Q` or `Escape` to return to the carousel.
+`make run` launches the executable from `source/`, where the application expects
+to resolve its runtime assets.
 
 To remove generated object files and the executable:
 
@@ -73,18 +117,27 @@ To remove generated object files and the executable:
 make clean
 ```
 
+## Local data
+
+High scores are stored in the following runtime files:
+
+- `source/highscores_brick_breaker.txt`
+- `source/highscores_tetris.txt`
+- `source/highscores_frogger.txt`
+
+These files contain local player data and are intentionally ignored by Git.
+
 ## Project layout
 
-- `source/` — application entry point and runtime assets
-- `GUI_files/headers/` — menu, screen, node, entity, and game interfaces
-- `GUI_files/cpp_files/` — implementation files
-- `SDL_files/` — SDL2 headers and macOS libraries from the original project
+- `source/` - application entry point, fonts, audio, sprites, and other assets
+- `GUI_files/headers/` - interfaces for menus, nodes, screens, entities, and games
+- `GUI_files/cpp_files/` - gameplay and framework implementations
+- `SDL_files/` - SDL2 headers and macOS libraries used by the current build
 
-## Next steps
+## Future improvements
 
-- Add additional Breakout levels, sound effects, and persistent high scores.
-- Add hold-piece support and pause handling to Tetris.
-- Add Frogger animations and pause handling.
-- Replace the bundled SDL distribution with package-manager/CMake discovery for
-  portable Linux and Windows builds.
-- Add automated tests around navigation and game physics.
+- Add hold-piece and pause support to Tetris
+- Add animation and pause support to Frogger
+- Add automated tests for scoring, collision rules, and navigation
+- Replace bundled SDL libraries with CMake-based dependency discovery
+- Add portable Linux and Windows build configurations
