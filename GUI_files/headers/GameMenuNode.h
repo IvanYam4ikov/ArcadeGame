@@ -9,14 +9,17 @@
 #include "Config.h"
 #include "GameNode.h"
 #include "TetrisNode.h"
+#include "FroggerNode.h"
 
 class GameMenuNode : public Node {		// GameMenuNode inherits from Node
 public:
 	GameMenuNode(SDL_Renderer* renderer_in = nullptr, Node* parentNode_in = nullptr) : Node(renderer_in, parentNode_in) {
 		GameNode* breakoutGame = new GameNode(renderer_in, this);
 		TetrisNode* tetrisGame = new TetrisNode(renderer_in, this);
+		FroggerNode* froggerGame = new FroggerNode(renderer_in, this);
 		children.push_back(breakoutGame);
 		children.push_back(tetrisGame);
+		children.push_back(froggerGame);
 		
 		// Declare and initialize screens for three games
     	MenuScreen* tetrisScreen = createMenuScreen();
@@ -113,7 +116,7 @@ public:
 
 		SimpleButton* froggerButton = createSimpleButton(renderer_in, "gameMenuNodeImages/froggerGameButton.png");
 		froggerButton->setButtonPosition(windowWidth / 2 - froggerButton->getWidth() / 2, windowHeight / 2 - froggerButton->getHeight() / 2);
-		froggerButton->setButtonAction(createAction(MOVE_NODES, getParentNode()));
+		froggerButton->setButtonAction(createAction(MOVE_NODES, froggerGame));
 		froggerScreen->addButtonToScreen(froggerButton);
 		
 		SimpleButton* froggerNextButton = createSimpleButton(renderer_in, "gameMenuNodeImages/nextScreenButton.png");

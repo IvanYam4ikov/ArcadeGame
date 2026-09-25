@@ -7,6 +7,7 @@
 #include "HighscoresNode.h"
 #include "GameMenuNode.h"
 #include "OptionsNode.h"
+#include "ControlsNode.h"
  
 class RootNode : public Node {      // RootNode inherits from Node
 private:
@@ -14,6 +15,7 @@ private:
     HighscoresNode* highscoresNode; 
     GameMenuNode* gameMenuNode;
     OptionsNode* optionsNode;
+    ControlsNode* controlsNode;
  
 public:
     
@@ -24,12 +26,14 @@ public:
         highscoresNode = new HighscoresNode(getRenderer(), this);
         gameMenuNode = new GameMenuNode(getRenderer(), this);
         optionsNode = new OptionsNode(getRenderer(), this);
+        controlsNode = new ControlsNode(getRenderer(), this);
         // After the constructors for the three nodes above are executed, the rest of the code below is executed
 
         // Every node has a list of pointers to its children
         children.push_back(highscoresNode);
         children.push_back(gameMenuNode);
         children.push_back(optionsNode);
+        children.push_back(controlsNode);
 
         // Create a screen for the RootNode
         MenuScreen* rootNodeScreen = createMenuScreen();
@@ -57,16 +61,23 @@ public:
         // Link this button to the gameMenuNode by creating an action and passing the gameMenuNode pointer as the action parameter
         gameMenuButton->setButtonAction(createAction(MOVE_NODES, gameMenuNode));
  
+        SimpleButton* controlsButton = createSimpleTextButton(renderer_in,
+            "fonts/pixel/classic.ttf", 30, "CONTROLS", 255, 0, 0);
+        controlsButton->setButtonPosition(windowWidth / 2 - controlsButton->getWidth() / 2,
+                                          gameMenuButton->getY() + gameMenuButton->getHeight() + 25);
+        controlsButton->setButtonAction(createAction(MOVE_NODES, controlsNode));
+
         // Create a button that will take us to the OptionsNode
         SimpleButton* optionsButton = createSimpleTextButton(renderer_in, "fonts/pixel/classic.ttf", 30, "OPTIONS", 255, 0, 0);
         optionsButton->setButtonPosition(windowWidth / 2 - optionsButton->getWidth() / 2, 
-                                         gameMenuButton->getY() + gameMenuButton->getHeight() + 25);
+                                         controlsButton->getY() + controlsButton->getHeight() + 25);
         // link this button to the optionsNode by creating an action and passing the optionsNode pointer as the action parameter
         optionsButton->setButtonAction(createAction(MOVE_NODES, optionsNode));
 
         // Add the buttons that we previously created to the RootNode screen
         rootNodeScreen->addButtonToScreen(highscoresButton);
         rootNodeScreen->addButtonToScreen(gameMenuButton);
+        rootNodeScreen->addButtonToScreen(controlsButton);
         rootNodeScreen->addButtonToScreen(optionsButton);
         
         // Add the screen to the RootNode and set it as the current

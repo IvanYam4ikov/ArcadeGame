@@ -66,8 +66,12 @@ Action TetrisGame::update(SDL_Event* event)
         }
         if (key == SDLK_n && gameOver) newGame();
         if (!gameOver) {
-            if (key == SDLK_LEFT) tryMove(-1, 0);
-            else if (key == SDLK_RIGHT) tryMove(1, 0);
+            if (key == SDLK_LEFT) {
+                if (!tryMove(-1, 0)) SoundEffects::playWall();
+            }
+            else if (key == SDLK_RIGHT) {
+                if (!tryMove(1, 0)) SoundEffects::playWall();
+            }
             else if (key == SDLK_DOWN) {
                 if (tryMove(0, 1)) {
                     ++score;

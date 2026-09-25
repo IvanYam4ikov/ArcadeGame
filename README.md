@@ -17,7 +17,10 @@ game-over detection. Completed rows are removed, scoring follows the standard
 single/double/triple/Tetris values, and the game accelerates every ten lines.
 A seven-piece bag keeps piece selection fair, the next piece is previewed, and
 an outlined ghost piece shows where the active piece will land. Tetris scores
-are saved to its own leaderboard. Frogger remains a menu concept.
+are saved to its own leaderboard. Frogger includes traffic and river lanes,
+moving logs, five home bays, lives, timed crossings, scoring, progressively
+faster rounds, pixel-art sprites, and its own saved high scores. A shared
+Controls screen documents input for all three games.
 
 The Sound option controls generated menu-click and Breakout collision effects
 as well as the selected background music. Clearing the entire board restores
@@ -30,8 +33,8 @@ When all lives are lost, the score is written to
 Brick Breaker, Tetris, or Frogger, each backed by its own top-ten score file.
 These local player-data files are intentionally ignored by Git.
 
-Every fifth destroyed brick drops a power-up. The drops cycle through a wider
-paddle, multiball, an extra life, temporary slow motion, and a temporary
+Every fifth destroyed brick drops a randomized power-up: a wider paddle,
+multiball, an extra life, temporary slow motion, or a temporary
 piercing ball that passes through bricks. Pink, cyan, green, blue, and orange
 pixel-art drops represent those effects respectively. Timed effects last ten
 seconds.
@@ -60,6 +63,10 @@ In Tetris, use Left/Right to move, Down to soft drop, Up or `Z` to rotate,
 `Space` to hard drop, `N` to restart after game over, and `Q` or `Escape` to
 return to the carousel.
 
+In Frogger, use the arrow keys or `W`/`A`/`S`/`D` to hop, reach each of the five
+home bays before time expires, press `N` to restart after game over, and press
+`Q` or `Escape` to return to the carousel.
+
 To remove generated object files and the executable:
 
 ```sh
@@ -76,8 +83,8 @@ make clean
 ## Next steps
 
 - Add additional Breakout levels, sound effects, and persistent high scores.
-- Add a ghost piece, hold-piece support, and pause handling to Tetris.
-- Implement or remove the Frogger placeholder.
+- Add hold-piece support and pause handling to Tetris.
+- Add Frogger animations and pause handling.
 - Replace the bundled SDL distribution with package-manager/CMake discovery for
   portable Linux and Windows builds.
 - Add automated tests around navigation and game physics.
